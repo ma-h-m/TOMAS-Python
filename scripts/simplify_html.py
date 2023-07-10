@@ -14,10 +14,11 @@ import htmlmin
 
 from html_parser import simplify_html
 
-url = "https://www.greyhound.com"
+url = "https://www.greyhound.com/"
 
 options = Options()
 options.headless = False
+options.add_argument("--incognito")
 options.add_argument("--window-size=390,844")
 options.add_argument(
     "user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1"
@@ -28,8 +29,9 @@ driver = webdriver.Chrome(service=webdriver_service, options=options)
 
 driver.get(url)
 time.sleep(3)
-button = driver.find_element(By.ID, "searchInputMobile-from")
-button.click()
+# interaction part
+# button = driver.find_element(By.XPATH, "/html/body/header/nav/div[2]/div/div[1]/button")
+# button.click()
 time.sleep(3)
 
 hidden_element_ids = []

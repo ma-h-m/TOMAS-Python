@@ -105,10 +105,14 @@ def extract_action_components(root):
     for i in list_elements:
         traverse_element(i, added_i_values)
 
+    table_elements = BeautifulSoup.find_all(tmp_root, lambda tag: tag.name in ["table"])
+    for i in table_elements:
+        traverse_element(i, added_i_values)
+
     # get all other interactive elements
     interactive_elements = BeautifulSoup.find_all(tmp_root, lambda tag: tag.name in ["button", "input", "a", "select", "textarea"])
 
-    # remove list elements from interactive elements
+    # remove duplicated elements from interactive elements
     tmp_set = set(interactive_elements)
     for i in tmp_set:
         if i.get("i") in added_i_values:
@@ -138,6 +142,15 @@ def extract_action_components(root):
             }
         )
     
-    return components
+    for element in table_elements:
+        
+        components.append(
+            {
+                "html": str(element),
+                "type": "table",
+                "i": element.get("i"),
+            }
+        )
 
+    return components
 

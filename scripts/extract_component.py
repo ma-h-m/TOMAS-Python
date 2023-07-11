@@ -30,25 +30,16 @@ def query_selector_all_reverse_bfs(root, selector):
 
 
 conditions = [
-    {
-        "type": "input_radio",
-        "test": lambda element: len(element.select('input[type="radio"]')) >= 2,
-    },
+
     {
         "type": "button",
         "test": lambda element: element.name == "button"
-        and element.get("type") == "button",
+        #and element.get("type") == "button",
     },
-    {
-        "type": "input_button",
-        "test": lambda element: element.name == "div"
-        and element.select_one('input[type="button"]')
-        and element.select_one("label"),
-    },
+
     {
         "type": "link",
         "test": lambda element: element.name == "a"
-        # or (element.name == "div" and element.select_one("a") ),
     },
     {
         "type": "list",
@@ -62,6 +53,26 @@ conditions = [
         and element.has_attr('type') == False,
     }
     ,
+    {
+        "type": "input_radio",
+        "test": lambda element: element.name == "input" and element.get("type") == "radio",
+    },
+    {
+        "type": "input_button",
+        "test": lambda element: element.name == "input" and element.get("type") == "button",
+    },
+    {
+        "type": "input_checkbox",
+        "test": lambda element: element.name == "input" and element.get("type") == "checkbox",
+    },
+    {
+        "type": "input_text",
+        "test": lambda element: element.name == "input" and element.get("type") == "text",
+    },
+    {
+        "type": "input_range",
+        "test": lambda element: element.name == "input" and element.get("type") == "range",
+    },
     
 ]
 
@@ -129,31 +140,4 @@ def extract_action_components(root):
     
     return components
 
-# def extract_action_components(root):
-#     components = []
-#     candidate_elements = query_selector_all_reverse_bfs(root, ["div", "button"])
-#     added_i_values = set()
 
-#     for i in range(len(candidate_elements)):
-#         condition_type = get_condition(candidate_elements[i])
-#         if condition_type:
-#             current_i_value = candidate_elements[i].get("i")
-
-#             if current_i_value in added_i_values:
-#                 continue
-
-#             descendants = candidate_elements[i].select("*")
-#             if any(descendant.get("i") in added_i_values for descendant in descendants):
-#                 continue
-
-#             if current_i_value:
-#                 components.append(
-#                     {
-#                         "html": str(candidate_elements[i]),
-#                         "type": condition_type,
-#                         "i": current_i_value,
-#                     }
-#                 )
-#                 added_i_values.add(current_i_value)
-
-#     return components

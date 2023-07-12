@@ -1,5 +1,4 @@
 from bs4 import BeautifulSoup, NavigableString
-
 from extract_component import extract_action_components
 
 
@@ -86,7 +85,8 @@ def simplify_html(html, hidden_element_ids):
         ],
         [],
     )
+
     remove_empty_elements(body, ["input", "button", "label", "a"])
-    simplify_nested_structure(body, ["div", "span"], ["a"])
+    simplify_nested_structure(body, ["div", "span"], ["button", "input", "a", "select", "textarea"])
     components = extract_action_components(body)
     return str(body), components

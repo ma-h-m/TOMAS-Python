@@ -1,24 +1,23 @@
-import os
 import datetime
-import time
 import json
+import os
+import time
+
+import htmlmin
+from bs4 import BeautifulSoup
+from html_parser import simplify_html
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
-from bs4 import BeautifulSoup
-import htmlmin
-
-from html_parser import simplify_html
 
 url = "https://www.greyhound.com/"
 
 options = Options()
 options.headless = False
-options.add_argument("--incognito")
 options.add_argument("--window-size=390,844")
 options.add_argument(
     "user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1"
@@ -28,14 +27,22 @@ webdriver_service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=webdriver_service, options=options)
 
 driver.get(url)
+
+
+# action
+
+
 time.sleep(3)
-# interaction part
-# button = driver.find_element(By.XPATH, "/html/body/header/nav/div[2]/div/div[1]/button")
-# button.click()
+button = driver.find_element(By.XPATH, '//*[@id="dateInput-from"]')
+button.click()
+
+
 time.sleep(3)
 
 hidden_element_ids = []
 id_counter = 0
+
+# driver.implicitly_wait(10)
 
 elements = driver.find_elements(By.XPATH, "//*")
 for el in elements:
@@ -44,7 +51,7 @@ for el in elements:
     is_hidden = (
         el.value_of_css_property("display") == "none"
         or el.value_of_css_property("visibility") == "hidden"
-        or width_in_pixels <= 5
+        # or width_in_pixels <= 5 # do not use this when debugging OTZ
     )
 
     if is_hidden:

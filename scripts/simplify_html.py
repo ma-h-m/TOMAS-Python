@@ -32,9 +32,9 @@ driver.get(url)
 # action
 
 
-time.sleep(3)
-button = driver.find_element(By.XPATH, '//*[@id="dateInput-from"]')
-button.click()
+# time.sleep(3)
+# button = driver.find_element(By.XPATH, '//*[@id="dateInput-from"]')
+# button.click()
 
 
 time.sleep(3)

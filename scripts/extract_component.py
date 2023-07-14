@@ -73,6 +73,14 @@ conditions = [
         "type": "input_range",
         "test": lambda element: element.name == "input" and element.get("type") == "range",
     },
+    {
+        "type": "paragraph",
+        "test": lambda element: element.name == "p",
+    },
+    {
+        "type": "Unknown",
+        "test": lambda element: 1==1, # For merged components, we don't know what it is, so just use Unknown
+    }
     
 ]
 
@@ -95,6 +103,23 @@ def traverse_element(element, s):
         traverse_element(child,s)  
 
 
+threshold = 10
+# Used for merged components. Set the threshold above.
+def traverse_element2(element, s, action_components:set):
+    if not isinstance(element, Tag):
+        return
+    tmp_leave_node_set = set()
+    traverse_element(element,tmp_leave_node_set)
+    inter_set = tmp_leave_node_set.intersection(action_components)
+    if len(inter_set) == 0:
+        return
+    if len(inter_set) <= threshold:
+        s.append(element)
+        return 
+    
+    for child in element.children:
+        traverse_element2(child,s, action_components)  
+
 def extract_action_components(root):
     
 
@@ -105,12 +130,31 @@ def extract_action_components(root):
     for i in list_elements:
         traverse_element(i, added_i_values)
 
+    # get table elements
     table_elements = BeautifulSoup.find_all(tmp_root, lambda tag: tag.name in ["table"])
     for i in table_elements:
         traverse_element(i, added_i_values)
 
+    # get fieldset elements
+    fieldset_elements = BeautifulSoup.find_all(tmp_root, lambda tag: tag.name in ["fieldset"])
+    for i in fieldset_elements:
+        traverse_element(i, added_i_values)
+    
+    # find all paragraph elements with interactive elements
+    paragraph_elements = BeautifulSoup.find_all(tmp_root, lambda tag: tag.name in ["p"])
+    paragraph_with_active_elements = []
+    for i in paragraph_elements:
+        tmp_len_rec = len(added_i_values)
+        traverse_element(i, added_i_values)
+        if len(added_i_values) > tmp_len_rec:
+            paragraph_with_active_elements.append(i)
+    
     # get all other interactive elements
     interactive_elements = BeautifulSoup.find_all(tmp_root, lambda tag: tag.name in ["button", "input", "a", "select", "textarea"])
+    with open("interactive_elements.txt", "w") as f:
+        for i in interactive_elements:
+            f.write(str(i.get("i")) + " ")
+
 
     # remove duplicated elements from interactive elements
     tmp_set = set(interactive_elements)
@@ -118,10 +162,22 @@ def extract_action_components(root):
         if i.get("i") in added_i_values:
             interactive_elements.remove(i)
 
-        
+    interactive_elements += list_elements
+    interactive_elements += table_elements
+    interactive_elements += fieldset_elements
+    interactive_elements += paragraph_with_active_elements
+
+
+    # merge components
+    # For each element containing less than {threshold} action compenents, we try to merge them.
+
+    merged_components = []
+    action_components_i_attr = set([i.get("i") for i in interactive_elements])
+    traverse_element2(tmp_root, merged_components, action_components_i_attr)
             
     components = []
-    for element in interactive_elements:
+
+    for element in merged_components:
         condition_type = get_condition(element)
         if condition_type:
             components.append(
@@ -132,25 +188,7 @@ def extract_action_components(root):
                 }
             )
 
-    for element in list_elements:
-    
-        components.append(
-            {
-                "html": str(element),
-                "type": "list",
-                "i": element.get("i"),
-            }
-        )
-    
-    for element in table_elements:
-        
-        components.append(
-            {
-                "html": str(element),
-                "type": "table",
-                "i": element.get("i"),
-            }
-        )
+
 
     return components
 

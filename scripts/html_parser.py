@@ -60,16 +60,36 @@ def simplify_nested_structure(element, target_tags, avoid_tags):
         if not isinstance(child, NavigableString):
             simplify_nested_structure(child, target_tags, avoid_tags)
 
+# for debugging
+def tag_print(element, name:str):
+
+    import os
+
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+    output_dir = os.path.join(current_dir, f"../output/debug/")
+    os.makedirs(output_dir, exist_ok=True)
+
+    output_html_file_name = f"body_{name}.html"
+    output_html_file = os.path.join(output_dir, output_html_file_name)
+
+    with open(output_html_file, "w") as html_file:
+        html_file.write(str(element))
+
 
 def simplify_html(html, hidden_element_ids):
     soup = BeautifulSoup(html, "html.parser")
+
     for hidden_id in hidden_element_ids:
         hidden_element = soup.find(attrs={"i": hidden_id})
         if hidden_element:
             hidden_element.decompose()
+
     body = soup.body
+
     remove_specific_tags(body, ["script", "style", "svg", "path", "link", "meta"])
+
     remove_attributes(body, ["i", "href"], ["input", "button", "label"])
+
     remove_attributes(
         body,
         [
@@ -86,7 +106,10 @@ def simplify_html(html, hidden_element_ids):
         [],
     )
 
+
     remove_empty_elements(body, ["input", "button", "label", "a"])
+
     simplify_nested_structure(body, ["div", "span"], ["button", "input", "a", "select", "textarea"])
+
     components = extract_action_components(body)
     return str(body), components
